@@ -209,7 +209,7 @@ export function setupHtmlMode(content, onChange, worker, getEditor) {
               details.parentNode.style.marginRight = '0'
             }
           })
-          observer.observe(details, {
+          observer.observe(details.parentNode, {
             attributes: true,
             attributeFilter: ['style'],
           })
