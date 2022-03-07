@@ -1,11 +1,13 @@
 import * as monaco from 'monaco-editor'
-import { SuggestAdapter } from 'monaco-editor/esm/vs/language/typescript/languageFeatures'
+import {
+  DiagnosticsAdapter,
+  SuggestAdapter,
+} from 'monaco-editor/esm/vs/language/typescript/tsMode'
 import types1 from '!!raw-loader!../monaco/types.d.ts'
 import types2 from '!!raw-loader!../monaco/types-v2.d.ts'
 import types3 from '!!raw-loader!../monaco/types-v3.d.ts'
 import postcssTypes from '!!raw-loader!string-replace-loader?search=\\/\\*.*?\\*\\/&replace=&flags=sg!../../node_modules/postcss/lib/postcss.d.ts'
 import sourcemapTypes from '!!raw-loader!source-map-js/source-map.d.ts'
-import { DiagnosticsAdapter } from 'monaco-editor/esm/vs/language/typescript/languageFeatures'
 
 const CONFIG_URI = 'file:///Config'
 const CONFIG_PROXY_URI = 'file:///Config.proxy'

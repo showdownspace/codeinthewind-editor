@@ -1,13 +1,12 @@
 import * as monaco from 'monaco-editor'
-import { setupMode } from 'monaco-editor/esm/vs/language/css/cssMode'
 import {
+  setupMode,
   DiagnosticsAdapter,
   CompletionAdapter,
   DocumentColorAdapter,
   HoverAdapter,
-} from 'monaco-editor/esm/vs/language/css/languageFeatures'
+} from 'monaco-editor/esm/vs/language/css/cssMode'
 import { cssDefaults } from 'monaco-editor/esm/vs/language/css/monaco.contribution'
-import * as cssService from 'monaco-editor/esm/vs/language/css/_deps/vscode-css-languageservice/cssLanguageService'
 import { supplementMarkers } from './supplementMarkers'
 import { renderColorDecorators } from './renderColorDecorators'
 import { requestResponse } from '../utils/workers'
@@ -121,7 +120,7 @@ export function setupCssMode(content, onChange, worker, getEditor) {
                 return toDiagnostics(resource, d)
               })
               var model = monaco.editor.getModel(resource)
-              if (model.getModeId() === languageId) {
+              if (model.getLanguageId() === languageId) {
                 monaco.editor.setModelMarkers(
                   model,
                   languageId,
@@ -568,13 +567,13 @@ const language = {
 
 function toSeverity(lsSeverity) {
   switch (lsSeverity) {
-    case cssService.DiagnosticSeverity.Error:
+    case 1: // DiagnosticSeverity.Error
       return monaco.MarkerSeverity.Error
-    case cssService.DiagnosticSeverity.Warning:
+    case 2: // DiagnosticSeverity.Warning
       return monaco.MarkerSeverity.Warning
-    case cssService.DiagnosticSeverity.Information:
+    case 3: // DiagnosticSeverity.Information
       return monaco.MarkerSeverity.Info
-    case cssService.DiagnosticSeverity.Hint:
+    case 4: // DiagnosticSeverity.Hint
       return monaco.MarkerSeverity.Hint
     default:
       return monaco.MarkerSeverity.Info

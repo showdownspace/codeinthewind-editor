@@ -126,8 +126,11 @@ export function createMonacoEditor({
       'editorBracketMatch.border': '#' + getColor('slate.300'),
       'editorSuggestWidget.background': '#' + getColor('slate.50'),
       'editorSuggestWidget.selectedBackground': '#' + getColor('slate.400/0.1'),
+      'editorSuggestWidget.selectedForeground': '#' + getColor('slate.700'),
       'editorSuggestWidget.foreground': '#' + getColor('slate.700'),
       'editorSuggestWidget.highlightForeground': '#' + getColor('indigo.500'),
+      'editorSuggestWidget.focusHighlightForeground':
+        '#' + getColor('indigo.500'),
       'editorHoverWidget.background': '#' + getColor('slate.50'),
       'editorError.foreground': '#' + getColor('red.500'),
       'editorWarning.foreground': '#' + getColor('yellow.500'),
@@ -176,7 +179,9 @@ export function createMonacoEditor({
       'editorSuggestWidget.selectedBackground':
         '#' + getColor('slate.400/0.12'),
       'editorSuggestWidget.foreground': '#' + getColor('slate.300'),
+      'editorSuggestWidget.selectedForeground': '#' + getColor('slate.300'),
       'editorSuggestWidget.highlightForeground': '#' + getColor('sky.400'),
+      'editorSuggestWidget.focusHighlightForeground': '#' + getColor('sky.400'),
       'editorHoverWidget.background': '#' + getColor('slate.700'),
       'editorError.foreground': '#' + getColor('red.400'),
       'editorWarning.foreground': '#' + getColor('yellow.400'),
@@ -286,7 +291,7 @@ function setupKeybindings(editor) {
   const { handler, when } = CommandsRegistry.getCommand(formatCommandId)
   editor._standaloneKeybindingService.addDynamicKeybinding(
     formatCommandId,
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
+    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
     handler,
     when
   )
@@ -303,7 +308,7 @@ function registerDocumentFormattingEditProviders() {
       }
       const { canceled, error, pretty } = await prettierWorker.emit({
         text: model.getValue(),
-        language: model.getModeId(),
+        language: model.getLanguageId(),
       })
       if (canceled || error) return []
       return [

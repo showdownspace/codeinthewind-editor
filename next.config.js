@@ -132,15 +132,15 @@ module.exports = {
     config.module.rules.push({
       test: {
         or: [
-          require.resolve('monaco-editor/esm/vs/language/css/cssWorker.js'),
+          require.resolve('monaco-editor/esm/vs/language/css/css.worker.js'),
           require.resolve('monaco-editor/dev/vs/language/css/cssWorker.js'),
         ],
       },
       use: [
         createLoader(function (source) {
           return source.replace(
-            "case 'css':",
-            "case 'css':\ncase 'tailwindcss':"
+            'case "css":',
+            'case "css":\ncase "tailwindcss":'
           )
         }),
       ],
