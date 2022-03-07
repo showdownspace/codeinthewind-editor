@@ -1,5 +1,6 @@
 import * as monaco from 'monaco-editor'
 import { requestResponse } from '../utils/workers'
+import { CommandsRegistry } from 'monaco-editor/esm/vs/platform/commands/common/commands'
 import { setupHtmlMode } from './html'
 import { setupCssMode } from './css'
 import { setupJavaScriptMode } from './javascript'
@@ -124,8 +125,11 @@ export function createMonacoEditor({
       'editorBracketMatch.border': '#' + getColor('slate.300'),
       'editorSuggestWidget.background': '#' + getColor('slate.50'),
       'editorSuggestWidget.selectedBackground': '#' + getColor('slate.400/0.1'),
+      'editorSuggestWidget.selectedForeground': '#' + getColor('slate.700'),
       'editorSuggestWidget.foreground': '#' + getColor('slate.700'),
       'editorSuggestWidget.highlightForeground': '#' + getColor('indigo.500'),
+      'editorSuggestWidget.focusHighlightForeground':
+        '#' + getColor('indigo.500'),
       'editorHoverWidget.background': '#' + getColor('slate.50'),
       'editorError.foreground': '#' + getColor('red.500'),
       'editorWarning.foreground': '#' + getColor('yellow.500'),
@@ -174,7 +178,9 @@ export function createMonacoEditor({
       'editorSuggestWidget.selectedBackground':
         '#' + getColor('slate.400/0.12'),
       'editorSuggestWidget.foreground': '#' + getColor('slate.300'),
+      'editorSuggestWidget.selectedForeground': '#' + getColor('slate.300'),
       'editorSuggestWidget.highlightForeground': '#' + getColor('sky.400'),
+      'editorSuggestWidget.focusHighlightForeground': '#' + getColor('sky.400'),
       'editorHoverWidget.background': '#' + getColor('slate.700'),
       'editorError.foreground': '#' + getColor('red.400'),
       'editorWarning.foreground': '#' + getColor('yellow.400'),
@@ -275,12 +281,18 @@ export function createMonacoEditor({
 }
 
 function setupKeybindings(editor) {
+  let formatCommandId = 'editor.action.formatDocument'
   editor._standaloneKeybindingService.addDynamicKeybinding(
-    '-editor.action.formatDocument'
+    `-${formatCommandId}`,
+    null,
+    () => {}
   )
+  const { handler, when } = CommandsRegistry.getCommand(formatCommandId)
   editor._standaloneKeybindingService.addDynamicKeybinding(
-    'editor.action.formatDocument',
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S
+    formatCommandId,
+    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+    handler,
+    when
   )
 }
 
@@ -292,7 +304,7 @@ function registerDocumentFormattingEditProviders(worker) {
       const { result, error } = await requestResponse(worker.current, {
         prettier: {
           text: model.getValue(),
-          language: model.getModeId(),
+          language: model.getLanguageId(),
         },
       })
       if (error) return []

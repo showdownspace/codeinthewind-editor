@@ -234,6 +234,15 @@ type VariantConfig =
       respectImportant: false;
     }>;
 type ValueType = 'any' | 'color' | 'url' | 'image' | 'length' | 'percentage' | 'position' | 'lookup' | 'generic-name' | 'family-name' | 'number' | 'line-width' | 'absolute-size' | 'relative-size';
+type VariantDefinition =
+  | string
+  | ((api: {
+      container: postcss.Container
+      separator: string
+      modifySelectors: (
+        modifierFunction: (api: { className: string; selector: string }) => void
+      ) => void
+    }) => string | null | void)
 type PluginAPI = {
   /** Get access to the whole config */
   config: <TDefaultValue = TailwindConfig>(
@@ -264,18 +273,7 @@ type PluginAPI = {
   ) => void;
   addVariant: (
     name: string,
-    generator: (api: {
-      container: postcss.Container,
-      separator: string,
-      modifySelectors: (
-        modifierFunction: (
-          api: {
-            className: string
-            selector: string
-          }
-        ) => void
-      ) => void
-    }) => void
+    definition: VariantDefinition | Array<VariantDefinition>
   ) => void;
   matchUtilities: <T>(
     utilities: Record<string, (value: T) => Record>,

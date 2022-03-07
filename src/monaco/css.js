@@ -1,17 +1,18 @@
 import * as monaco from 'monaco-editor'
-import { setupMode } from 'monaco-editor/esm/vs/language/css/cssMode'
 import {
+  setupMode,
   DiagnosticsAdapter,
   CompletionAdapter,
   DocumentColorAdapter,
   HoverAdapter,
-} from 'monaco-editor/esm/vs/language/css/languageFeatures'
-import { LanguageServiceDefaultsImpl } from 'monaco-editor/esm/vs/language/css/monaco.contribution'
-import * as cssService from 'monaco-editor/esm/vs/language/css/_deps/vscode-css-languageservice/cssLanguageService'
+} from 'monaco-editor/esm/vs/language/css/cssMode'
+import { cssDefaults } from 'monaco-editor/esm/vs/language/css/monaco.contribution'
 import { supplementMarkers } from './supplementMarkers'
 import { renderColorDecorators } from './renderColorDecorators'
 import { requestResponse } from '../utils/workers'
 import { debounce } from 'debounce'
+
+cssDefaults._languageId = 'tailwindcss'
 
 const CSS_URI = 'file:///CSS'
 const CSS_PROXY_URI = 'file:///CSS.proxy'
@@ -39,15 +40,7 @@ export function setupCssMode(content, onChange, worker, getEditor) {
           )
         )
 
-        disposables.push(
-          setupMode(
-            new LanguageServiceDefaultsImpl(
-              'tailwindcss',
-              diagnosticsOptions,
-              modeConfiguration
-            )
-          )
-        )
+        disposables.push(setupMode(cssDefaults))
 
         const _provideCompletionItems =
           CompletionAdapter.prototype.provideCompletionItems
@@ -65,7 +58,8 @@ export function setupCssMode(content, onChange, worker, getEditor) {
         }
         disposables.push({
           dispose() {
-            CompletionAdapter.prototype.provideCompletionItems = _provideCompletionItems
+            CompletionAdapter.prototype.provideCompletionItems =
+              _provideCompletionItems
           },
         })
 
@@ -85,7 +79,8 @@ export function setupCssMode(content, onChange, worker, getEditor) {
         }
         disposables.push({
           dispose() {
-            DocumentColorAdapter.prototype.provideDocumentColors = _provideDocumentColors
+            DocumentColorAdapter.prototype.provideDocumentColors =
+              _provideDocumentColors
           },
         })
 
@@ -125,7 +120,7 @@ export function setupCssMode(content, onChange, worker, getEditor) {
                 return toDiagnostics(resource, d)
               })
               var model = monaco.editor.getModel(resource)
-              if (model.getModeId() === languageId) {
+              if (model.getLanguageId() === languageId) {
                 monaco.editor.setModelMarkers(
                   model,
                   languageId,
@@ -180,7 +175,11 @@ export function setupCssMode(content, onChange, worker, getEditor) {
           })
         )
 
-        model = monaco.editor.createModel(content || '', 'tailwindcss', CSS_URI)
+        model = monaco.editor.createModel(
+          content || '',
+          'tailwindcss',
+          monaco.Uri.parse(CSS_URI)
+        )
         model.updateOptions({ indentSize: 2, tabSize: 2 })
         disposables.push(model)
 
@@ -566,53 +565,15 @@ const language = {
   },
 }
 
-const diagnosticsOptions = {
-  validate: true,
-  lint: {
-    compatibleVendorPrefixes: 'ignore',
-    vendorPrefix: 'warning',
-    duplicateProperties: 'warning',
-    emptyRules: 'warning',
-    importStatement: 'ignore',
-    boxModel: 'ignore',
-    universalSelector: 'ignore',
-    zeroUnits: 'ignore',
-    fontFaceProperties: 'warning',
-    hexColorLength: 'error',
-    argumentsInColorFunction: 'error',
-    unknownProperties: 'warning',
-    ieHack: 'ignore',
-    unknownVendorSpecificProperties: 'ignore',
-    propertyIgnoredDueToDisplay: 'warning',
-    important: 'ignore',
-    float: 'ignore',
-    idSelector: 'ignore',
-  },
-}
-
-const modeConfiguration = {
-  completionItems: true,
-  hovers: true,
-  documentSymbols: true,
-  definitions: true,
-  references: true,
-  documentHighlights: true,
-  rename: true,
-  colors: true,
-  foldingRanges: true,
-  diagnostics: true,
-  selectionRanges: true,
-}
-
 function toSeverity(lsSeverity) {
   switch (lsSeverity) {
-    case cssService.DiagnosticSeverity.Error:
+    case 1: // DiagnosticSeverity.Error
       return monaco.MarkerSeverity.Error
-    case cssService.DiagnosticSeverity.Warning:
+    case 2: // DiagnosticSeverity.Warning
       return monaco.MarkerSeverity.Warning
-    case cssService.DiagnosticSeverity.Information:
+    case 3: // DiagnosticSeverity.Information
       return monaco.MarkerSeverity.Info
-    case cssService.DiagnosticSeverity.Hint:
+    case 4: // DiagnosticSeverity.Hint
       return monaco.MarkerSeverity.Hint
     default:
       return monaco.MarkerSeverity.Info

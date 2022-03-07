@@ -167,7 +167,7 @@ function HeaderButton({
 function VersionSwitcher({ value, onChange }) {
   return (
     <Listbox value={value} onChange={onChange} as="div" className="relative">
-      <Listbox.Button className="text-gray-500 text-xs leading-5 font-semibold bg-gray-400/10 rounded-full py-1 px-3 flex items-center hover:bg-gray-400/20 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700">
+      <Listbox.Button className="text-gray-500 text-xs leading-5 font-semibold bg-gray-400/10 rounded-full py-1 px-3 flex items-center hover:bg-gray-400/20 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:shadow-highlight/4">
         v{versions[value]}
         <svg
           width="6"

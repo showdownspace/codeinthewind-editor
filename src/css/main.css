@@ -105,7 +105,7 @@ body.cursor-nwse-resize * {
     monospace !important;
 }
 
-.monaco-editor .suggest-widget > .tree {
+.monaco-editor .suggest-widget {
   border: 0 !important;
   border-radius: 8px;
   overflow: hidden;
@@ -127,9 +127,7 @@ body.cursor-nwse-resize * {
   padding: 4px 0;
 }
 
-.monaco-editor .suggest-widget.docs-side > .details {
-  width: calc(50% - 8px) !important;
-  margin-left: 8px;
+.monaco-editor .suggest-details {
   border-radius: 8px;
   border: 0 !important;
   @apply shadow-lg ring-1 ring-gray-900/10;
@@ -184,14 +182,14 @@ body.cursor-nwse-resize * {
   color: theme('colors.gray.400');
 }
 
-.monaco-editor-hover {
+.monaco-hover {
   border: 0 !important;
   border-radius: 8px;
   @apply shadow-lg ring-1 ring-gray-900/10;
   color: theme('colors.gray.700') !important;
 }
 
-.vs-dark .monaco-editor-hover {
+.vs-dark .monaco-hover {
   color: theme('colors.gray.300') !important;
 }
 
@@ -204,25 +202,23 @@ body.cursor-nwse-resize * {
   color: theme('colors.gray.400') !important;
 }
 
-.monaco-editor-hover a {
+.monaco-hover a {
   color: theme('colors.indigo.500') !important;
 }
 
-.vs-dark .monaco-editor-hover a {
+.vs-dark .monaco-hover a {
   color: theme('colors.sky.400') !important;
 }
 
-.monaco-editor .monaco-editor-hover .hover-row:not(:first-child):not(:empty) {
+.monaco-editor .monaco-hover .hover-row:not(:first-child):not(:empty) {
   border-color: theme('colors.gray.200') !important;
 }
 
-.monaco-editor.vs-dark
-  .monaco-editor-hover
-  .hover-row:not(:first-child):not(:empty) {
+.monaco-editor.vs-dark .monaco-hover .hover-row:not(:first-child):not(:empty) {
   border-color: theme('colors.gray.600') !important;
 }
 
-.monaco-editor .monaco-editor-hover .hover-row .actions {
+.monaco-editor .monaco-hover .hover-row .actions {
   background-color: transparent !important;
 }
 

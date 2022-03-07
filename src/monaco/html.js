@@ -32,7 +32,8 @@ export function setupHtmlMode(content, onChange, worker, getEditor) {
         })
         return result ? result : { suggestions: [] }
       },
-      async resolveCompletionItem(model, _position, item, _token) {
+      async resolveCompletionItem(item, _token) {
+        const model = getEditor().getModel()
         const selections = getEditor().getSelections()
         let lines = model.getValue().split('\n')
 
@@ -164,7 +165,11 @@ export function setupHtmlMode(content, onChange, worker, getEditor) {
     })
   }
 
-  const model = monaco.editor.createModel(content || '', 'html', HTML_URI)
+  const model = monaco.editor.createModel(
+    content || '',
+    'html',
+    monaco.Uri.parse(HTML_URI)
+  )
   model.updateOptions({ indentSize: 2, tabSize: 2 })
   disposables.push(model)
 
@@ -174,22 +179,60 @@ export function setupHtmlMode(content, onChange, worker, getEditor) {
     const editor = getEditor()
     if (editor && editor._contentWidgets['editor.widget.suggestWidget']) {
       let visible = false
-      editor._contentWidgets['editor.widget.suggestWidget'].widget.onDidShow(
-        () => {
+
+      let widget =
+        editor._contentWidgets['editor.widget.suggestWidget'].widget._widget
+
+      disposables.push(
+        widget.onDidShow(() => {
           visible = true
-        }
+
+          let list = widget.element.domNode
+          let details = widget._details.widget.domNode
+
+          let observer = new MutationObserver(() => {
+            if (list.style.top === details.parentNode.style.top) {
+              details.parentNode.style.marginTop = '0'
+              if (
+                parseInt(list.style.left, 10) >
+                parseInt(details.parentNode.style.left, 10)
+              ) {
+                details.parentNode.style.marginLeft = '0'
+                details.parentNode.style.marginRight = '8px'
+              } else {
+                details.parentNode.style.marginLeft = '8px'
+                details.parentNode.style.marginRight = '0'
+              }
+            } else {
+              details.parentNode.style.marginTop = '8px'
+              details.parentNode.style.marginLeft = '0'
+              details.parentNode.style.marginRight = '0'
+            }
+          })
+          observer.observe(details.parentNode, {
+            attributes: true,
+            attributeFilter: ['style'],
+          })
+          disposables.push({
+            dispose: () => {
+              observer.disconnect()
+            },
+          })
+        })
       )
-      editor._contentWidgets['editor.widget.suggestWidget'].widget.onDidHide(
-        () => {
+      disposables.push(
+        editor._contentWidgets[
+          'editor.widget.suggestWidget'
+        ].widget._widget.onDidHide(() => {
           setTimeout(() => (visible = false), 0)
           if (editor.getModel() === model) {
             onChange()
           }
-        }
+        })
       )
       disposables.push(
         editor.onDidChangeModel(({ oldModelUrl }) => {
-          if (visible && oldModelUrl === HTML_URI) {
+          if (visible && oldModelUrl.toString() === HTML_URI) {
             onChange()
           }
         })

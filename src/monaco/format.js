@@ -13,6 +13,10 @@ const options = {
   },
 }
 
+function bigSign(bigIntValue) {
+  return (bigIntValue > 0n) - (bigIntValue < 0n)
+}
+
 function sortClasses(
   classStr,
   { state, ignoreFirst = false, ignoreLast = false }
@@ -46,7 +50,15 @@ function sortClasses(
     suffix = `${whitespace.pop() ?? ''}${classes.pop() ?? ''}`
   }
 
-  classes = state.jitContext.sortClassList(classes)
+  classes = state.jitContext
+    .getClassOrder(classes)
+    .sort(([, a], [, z]) => {
+      if (a === z) return 0
+      if (a === null) return -1
+      if (z === null) return 1
+      return bigSign(a - z)
+    })
+    .map(([className]) => className)
 
   for (let i = 0; i < classes.length; i++) {
     result += `${classes[i]}${whitespace[i] ?? ''}`
