@@ -21,6 +21,11 @@ import { get } from '../utils/database'
 import { toValidTailwindVersion } from '../utils/toValidTailwindVersion'
 import Head from 'next/head'
 import { getDefaultContent } from '../utils/getDefaultContent'
+import dynamic from 'next/dynamic'
+
+const CssOutputEditor = dynamic(() => import('../components/CssOutputEditor'), {
+  ssr: false,
+})
 
 const HEADER_HEIGHT = 60 - 1
 const TAB_BAR_HEIGHT = 40
@@ -45,13 +50,10 @@ function Pen({
   const isLg = useMedia('(min-width: 1024px)')
   const [dirty, setDirty] = useState(false)
   const [renderEditor, setRenderEditor] = useState(false)
-  const [
-    error,
-    setError,
-    setErrorImmediate,
-    cancelSetError,
-  ] = useDebouncedState(undefined, 1000)
+  const [error, setError, setErrorImmediate, cancelSetError] =
+    useDebouncedState(undefined, 1000)
   const editorRef = useRef()
+  const cssOutputEditorRef = useRef()
   const [responsiveDesignMode, setResponsiveDesignMode] = useState(
     initialResponsiveSize ? true : false
   )
@@ -118,6 +120,9 @@ function Pen({
 
   const inject = useCallback((content) => {
     previewRef.current.contentWindow.postMessage(content, '*')
+    if (content.css && cssOutputEditorRef.current) {
+      cssOutputEditorRef.current.setValue(content.css)
+    }
   }, [])
 
   async function compileNow(content) {
@@ -369,7 +374,6 @@ function Pen({
               size={size.current}
               onChange={updateCurrentSize}
               paneStyle={{ marginTop: -1 }}
-              pane1Style={{ display: 'flex', flexDirection: 'column' }}
               onDragStarted={() => setResizing(true)}
               onDragFinished={() => setResizing(false)}
               allowResize={isLg && size.layout !== 'preview'}
@@ -379,18 +383,30 @@ function Pen({
                   : 'Resizer-collapsed'
               }
             >
-              <div className="border-t border-gray-200 dark:border-white/10 mt-12 flex-auto flex">
-                {renderEditor && (
-                  <Editor
-                    editorRef={(ref) => (editorRef.current = ref)}
-                    initialContent={initialContent}
-                    onChange={onChange}
-                    worker={worker}
-                    activeTab={activeTab}
-                    tailwindVersion={tailwindVersion}
+              <SplitPane
+                split="horizontal"
+                defaultSize={400}
+                primary="second"
+                pane1Style={{ display: 'flex', flexDirection: 'column' }}
+              >
+                <div className="border-t border-gray-200 dark:border-white/10 mt-12 flex-auto flex">
+                  {renderEditor && (
+                    <Editor
+                      editorRef={(ref) => (editorRef.current = ref)}
+                      initialContent={initialContent}
+                      onChange={onChange}
+                      worker={worker}
+                      activeTab={activeTab}
+                      tailwindVersion={tailwindVersion}
+                    />
+                  )}
+                </div>
+                <div className="flex flex-auto">
+                  <CssOutputEditor
+                    editorRef={(ref) => (cssOutputEditorRef.current = ref)}
                   />
-                )}
-              </div>
+                </div>
+              </SplitPane>
               <div className="absolute inset-0 w-full h-full">
                 <Preview
                   ref={previewRef}

@@ -377,7 +377,10 @@ const language = {
     selectorname: [
       ['::?(@identifier)', 'pseudo'],
       ['(\\.|#(?=[^{])|%|(@identifier))+', 'tag'], // selector (.foo, div, ...)
+      ['\\\\', { token: 'tag', next: 'selectorescape' }],
     ],
+
+    selectorescape: [[/./, { token: 'tag', next: '@pop' }]],
 
     selectorattribute: [
       { include: '@term' },
