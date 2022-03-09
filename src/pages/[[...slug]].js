@@ -118,9 +118,9 @@ function Pen({
     }
   }, [initialContent.ID])
 
-  const inject = useCallback((content) => {
+  const inject = useCallback((content, options) => {
     previewRef.current.contentWindow.postMessage(content, '*')
-    if (content.css && cssOutputEditorRef.current) {
+    if (options?.updateCssOutput && content.css && cssOutputEditorRef.current) {
       cssOutputEditorRef.current.setValue(content.css)
     }
   }, [])
@@ -149,14 +149,14 @@ function Pen({
     setErrorImmediate()
     setJit(Boolean(jit))
     if (css || html) {
-      inject({ css, html })
+      inject({ css, html }, { updateCssOutput: !content.transient })
     }
   }
 
   const compile = useCallback(debounce(compileNow, 200), [])
 
   const onChange = useCallback(
-    (document, content) => {
+    (document, content, options) => {
       setDirty(true)
       if (document === 'html' && !jit) {
         inject({ html: content.html })
@@ -167,6 +167,7 @@ function Pen({
           config: content.config,
           skipIntelliSense: document === 'html',
           tailwindVersion,
+          transient: options?.transient,
         })
       }
     },

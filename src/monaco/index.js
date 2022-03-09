@@ -58,8 +58,8 @@ export function createMonacoEditor({
 
   const html = setupHtmlMode(
     initialContent.html,
-    (newContent) => {
-      triggerOnChange('html', newContent)
+    (newContent, options) => {
+      triggerOnChange('html', newContent, options)
     },
     worker,
     () => editor
@@ -201,22 +201,26 @@ export function createMonacoEditor({
 
   setupKeybindings(editor)
 
-  function triggerOnChange(id, newContent) {
+  function triggerOnChange(id, newContent, options) {
     if (onChangeCallback && shouldTriggerOnChange) {
-      onChangeCallback(id, {
-        html:
-          id === 'html' && typeof newContent !== 'undefined'
-            ? newContent
-            : html.getModel()?.getValue() ?? initialContent.html,
-        css:
-          id === 'css' && typeof newContent !== 'undefined'
-            ? newContent
-            : css.getModel()?.getValue() ?? initialContent.css,
-        config:
-          id === 'config' && typeof newContent !== 'undefined'
-            ? newContent
-            : config.getModel()?.getValue() ?? initialContent.config,
-      })
+      onChangeCallback(
+        id,
+        {
+          html:
+            id === 'html' && typeof newContent !== 'undefined'
+              ? newContent
+              : html.getModel()?.getValue() ?? initialContent.html,
+          css:
+            id === 'css' && typeof newContent !== 'undefined'
+              ? newContent
+              : css.getModel()?.getValue() ?? initialContent.css,
+          config:
+            id === 'config' && typeof newContent !== 'undefined'
+              ? newContent
+              : config.getModel()?.getValue() ?? initialContent.config,
+        },
+        options
+      )
     }
   }
 
