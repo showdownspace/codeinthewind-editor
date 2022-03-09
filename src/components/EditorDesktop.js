@@ -2,6 +2,8 @@ import { useRef, useEffect } from 'react'
 import { createMonacoEditor } from '../monaco'
 import * as monaco from 'monaco-editor'
 import { onDidChangeTheme } from '../utils/theme'
+import CssOutputEditor from './CssOutputEditor'
+import SplitPane from 'react-split-pane'
 
 export default function Editor({
   initialContent = {},
@@ -9,6 +11,7 @@ export default function Editor({
   worker,
   activeTab,
   editorRef: inRef,
+  cssOutputEditorRef,
   tailwindVersion,
 }) {
   const editorContainerRef = useRef()
@@ -88,11 +91,23 @@ export default function Editor({
   }, [activeTab])
 
   return (
-    <div className="relative flex-auto">
-      <div
-        ref={editorContainerRef}
-        className="absolute inset-0 w-full h-full"
-      />
-    </div>
+    <SplitPane
+      split="horizontal"
+      defaultSize={400}
+      primary="second"
+      pane1Style={{ display: 'flex', flexDirection: 'column' }}
+    >
+      <div className="border-t border-gray-200 dark:border-white/10 mt-12 flex-auto flex">
+        <div className="relative flex-auto">
+          <div
+            ref={editorContainerRef}
+            className="absolute inset-0 w-full h-full"
+          />
+        </div>
+      </div>
+      <div className="flex flex-auto">
+        <CssOutputEditor editorRef={cssOutputEditorRef} />
+      </div>
+    </SplitPane>
   )
 }

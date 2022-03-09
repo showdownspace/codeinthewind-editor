@@ -21,11 +21,6 @@ import { get } from '../utils/database'
 import { toValidTailwindVersion } from '../utils/toValidTailwindVersion'
 import Head from 'next/head'
 import { getDefaultContent } from '../utils/getDefaultContent'
-import dynamic from 'next/dynamic'
-
-const CssOutputEditor = dynamic(() => import('../components/CssOutputEditor'), {
-  ssr: false,
-})
 
 const HEADER_HEIGHT = 60 - 1
 const TAB_BAR_HEIGHT = 40
@@ -375,6 +370,7 @@ function Pen({
               size={size.current}
               onChange={updateCurrentSize}
               paneStyle={{ marginTop: -1 }}
+              pane1Style={{ display: 'flex', flexDirection: 'column' }}
               onDragStarted={() => setResizing(true)}
               onDragFinished={() => setResizing(false)}
               allowResize={isLg && size.layout !== 'preview'}
@@ -384,30 +380,19 @@ function Pen({
                   : 'Resizer-collapsed'
               }
             >
-              <SplitPane
-                split="horizontal"
-                defaultSize={400}
-                primary="second"
-                pane1Style={{ display: 'flex', flexDirection: 'column' }}
-              >
-                <div className="border-t border-gray-200 dark:border-white/10 mt-12 flex-auto flex">
-                  {renderEditor && (
-                    <Editor
-                      editorRef={(ref) => (editorRef.current = ref)}
-                      initialContent={initialContent}
-                      onChange={onChange}
-                      worker={worker}
-                      activeTab={activeTab}
-                      tailwindVersion={tailwindVersion}
-                    />
-                  )}
-                </div>
-                <div className="flex flex-auto">
-                  <CssOutputEditor
-                    editorRef={(ref) => (cssOutputEditorRef.current = ref)}
-                  />
-                </div>
-              </SplitPane>
+              {renderEditor && (
+                <Editor
+                  editorRef={(ref) => (editorRef.current = ref)}
+                  cssOutputEditorRef={(ref) =>
+                    (cssOutputEditorRef.current = ref)
+                  }
+                  initialContent={initialContent}
+                  onChange={onChange}
+                  worker={worker}
+                  activeTab={activeTab}
+                  tailwindVersion={tailwindVersion}
+                />
+              )}
               <div className="absolute inset-0 w-full h-full">
                 <Preview
                   ref={previewRef}

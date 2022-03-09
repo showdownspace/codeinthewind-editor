@@ -78,9 +78,8 @@ export default function EditorMobile({
   }, [activeTab, onChange])
 
   useEffect(() => {
-    history.current[
-      modeToDoc[cmRef.current.getOption('mode')]
-    ] = cmRef.current.getHistory()
+    history.current[modeToDoc[cmRef.current.getOption('mode')]] =
+      cmRef.current.getHistory()
 
     skipNextOnChange.current = true
     cmRef.current.setValue(content.current[activeTab])
@@ -108,8 +107,10 @@ export default function EditorMobile({
   }, [])
 
   return (
-    <div className="relative flex-auto">
-      <div ref={ref} className="absolute inset-0 w-full h-full" />
+    <div className="border-t border-gray-200 dark:border-white/10 mt-12 flex-auto flex">
+      <div className="relative flex-auto">
+        <div ref={ref} className="absolute inset-0 w-full h-full" />
+      </div>
     </div>
   )
 }
