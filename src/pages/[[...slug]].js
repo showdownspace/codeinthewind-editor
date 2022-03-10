@@ -117,6 +117,8 @@ function Pen({
     previewRef.current.contentWindow.postMessage(content, '*')
     if (options?.updateCssOutput && content.css && cssOutputEditorRef.current) {
       cssOutputEditorRef.current.setValue(content.css)
+      let model = cssOutputEditorRef.current.getModel()
+      model.forceTokenization(model.getLineCount())
     }
   }, [])
 
