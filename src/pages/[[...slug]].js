@@ -48,7 +48,7 @@ function Pen({
   const [error, setError, setErrorImmediate, cancelSetError] =
     useDebouncedState(undefined, 1000)
   const editorRef = useRef()
-  const cssOutputModelRef = useRef()
+  const cssOutputEditorRef = useRef()
   const [responsiveDesignMode, setResponsiveDesignMode] = useState(
     initialResponsiveSize ? true : false
   )
@@ -115,11 +115,10 @@ function Pen({
 
   const inject = useCallback((content, options) => {
     previewRef.current.contentWindow.postMessage(content, '*')
-    if (options?.updateCssOutput && content.css && cssOutputModelRef.current) {
-      cssOutputModelRef.current.setValue(content.css)
-      cssOutputModelRef.current.forceTokenization(
-        cssOutputModelRef.current.getLineCount()
-      )
+    if (options?.updateCssOutput && content.css && cssOutputEditorRef.current) {
+      cssOutputEditorRef.current.setValue(content.css)
+      let model = cssOutputEditorRef.current.getModel()
+      model.forceTokenization(model.getLineCount())
     }
   }, [])
 
@@ -386,7 +385,9 @@ function Pen({
               {renderEditor && (
                 <Editor
                   editorRef={(ref) => (editorRef.current = ref)}
-                  cssOutputModelRef={(ref) => (cssOutputModelRef.current = ref)}
+                  cssOutputEditorRef={(ref) =>
+                    (cssOutputEditorRef.current = ref)
+                  }
                   initialContent={initialContent}
                   onChange={onChange}
                   worker={worker}

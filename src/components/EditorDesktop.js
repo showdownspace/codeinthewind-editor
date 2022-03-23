@@ -11,14 +11,14 @@ export default function Editor({
   worker,
   activeTab,
   editorRef: inRef,
-  cssOutputModelRef,
+  cssOutputEditorRef: setCssOutputEditorRef,
   tailwindVersion,
 }) {
   const editorContainerRef = useRef()
   const editorRef = useRef()
   const editorState = useRef({})
   const cssOutputEditorContainerRef = useRef()
-  const cssOutputModel = useRef()
+  const cssOutputEditorRef = useRef()
   const cssOutputButtonHeight = 48
   const [size, setSize] = useState({ current: cssOutputButtonHeight })
   const [cssOutputVisible, setCssOutputVisible] = useState(false)
@@ -35,20 +35,12 @@ export default function Editor({
     editorRef.current = editor
     inRef(editor)
 
-    // CSS Output
-    let model = monaco.editor.createModel('', 'tailwindcss')
-    cssOutputModel.current = model
-    cssOutputModelRef(model)
-
     return () => {
       editorRef.current.dispose()
-      cssOutputModel.current.dispose()
     }
   }, [])
 
   useEffect(() => {
-    if (activeTab !== 'css') return
-
     let cssOutputEditor = monaco.editor.create(
       cssOutputEditorContainerRef.current,
       {
@@ -60,11 +52,13 @@ export default function Editor({
         theme: getTheme() === 'dark' ? 'tw-dark' : 'tw-light',
         fixedOverflowWidgets: true,
         readOnly: true,
-        // language: 'tailwindcss',
+        language: 'tailwindcss',
         renderLineHighlight: false,
-        model: cssOutputModel.current,
       }
     )
+
+    cssOutputEditorRef.current = cssOutputEditor
+    setCssOutputEditorRef(cssOutputEditor)
 
     const observer = new ResizeObserver(() => {
       cssOutputEditor.layout()
@@ -75,7 +69,7 @@ export default function Editor({
       observer.disconnect()
       cssOutputEditor.dispose()
     }
-  }, [activeTab])
+  }, [])
 
   useEffect(() => {
     editorRef.current.setOnChange(onChange)
@@ -150,7 +144,6 @@ export default function Editor({
         onChange={(newSize) => setSize({ ...size, current: newSize })}
         primary="second"
         pane1Style={{ display: 'flex', flexDirection: 'column' }}
-        pane2Style={activeTab === 'css' ? {} : { height: 0 }}
         resizerStyle={{ zIndex: 10 }}
       >
         <div className="border-t border-gray-200 dark:border-white/10 flex-auto flex">
@@ -161,49 +154,47 @@ export default function Editor({
             />
           </div>
         </div>
-        {activeTab === 'css' && (
-          <div className="flex-auto flex flex-col">
-            <button
-              type="button"
-              className="py-3 pl-6 pr-4 text-left text-sm leading-6 bg-white font-semibold focus:outline-none text-gray-700 hover:text-gray-900 focus:text-gray-900 dark:bg-gray-900 dark:text-gray-300 dark:hover:text-white flex items-center justify-between"
-              onClick={() => {
-                if (size.current <= cssOutputButtonHeight) {
-                  setSize({ ...size, current: 300 })
-                } else {
-                  setSize({ ...size, current: cssOutputButtonHeight })
+        <div className="flex-auto flex flex-col">
+          <button
+            type="button"
+            className="py-3 pl-6 pr-4 text-left text-sm leading-6 bg-white font-semibold focus:outline-none text-gray-700 hover:text-gray-900 focus:text-gray-900 dark:bg-gray-900 dark:text-gray-300 dark:hover:text-white flex items-center justify-between"
+            onClick={() => {
+              if (size.current <= cssOutputButtonHeight) {
+                setSize({ ...size, current: 300 })
+              } else {
+                setSize({ ...size, current: cssOutputButtonHeight })
+              }
+            }}
+          >
+            Compiled CSS
+            <svg
+              className="h-5 w-5 text-gray-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d={
+                  cssOutputVisible
+                    ? 'M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'
+                    : 'M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z'
                 }
-              }}
-            >
-              Compiled CSS
-              <svg
-                className="h-5 w-5 text-gray-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d={
-                    cssOutputVisible
-                      ? 'M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'
-                      : 'M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z'
-                  }
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-            <div
-              className={clsx(
-                'relative flex-auto border-t border-gray-200 dark:border-gray-800',
-                !cssOutputVisible && 'hidden'
-              )}
-            >
-              <div
-                ref={cssOutputEditorContainerRef}
-                className="absolute inset-0 w-full h-full"
+                clipRule="evenodd"
               />
-            </div>
+            </svg>
+          </button>
+          <div
+            className={clsx(
+              'relative flex-auto border-t border-gray-200 dark:border-gray-800',
+              !cssOutputVisible && 'hidden'
+            )}
+          >
+            <div
+              ref={cssOutputEditorContainerRef}
+              className="absolute inset-0 w-full h-full"
+            />
           </div>
-        )}
+        </div>
       </SplitPane>
     </div>
   )
