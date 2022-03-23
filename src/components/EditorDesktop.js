@@ -140,13 +140,13 @@ export default function Editor({
         split="horizontal"
         size={size.current}
         minSize={cssOutputButtonHeight}
-        maxSize={0}
+        maxSize={-1}
         onChange={(newSize) => setSize({ ...size, current: newSize })}
         primary="second"
         pane1Style={{ display: 'flex', flexDirection: 'column' }}
-        resizerStyle={{ zIndex: 10 }}
+        resizerStyle={{ zIndex: 10, background: 'none' }}
       >
-        <div className="border-t border-gray-200 dark:border-white/10 flex-auto flex">
+        <div className="border-t border-gray-200 dark:border-white/10 flex-auto flex -mb-2">
           <div className="relative flex-auto">
             <div
               ref={editorContainerRef}
@@ -154,10 +154,10 @@ export default function Editor({
             />
           </div>
         </div>
-        <div className="flex-auto flex flex-col">
+        <div className="flex-auto flex flex-col ring-1 ring-gray-900/[0.07] rounded-t-lg overflow-hidden dark:rounded-none dark:ring-0">
           <button
             type="button"
-            className="py-3 pl-6 pr-4 text-left text-sm leading-6 bg-white font-semibold focus:outline-none text-gray-700 hover:text-gray-900 focus:text-gray-900 dark:bg-gray-900 dark:text-gray-300 dark:hover:text-white flex items-center justify-between"
+            className="group h-12 px-6 text-left text-sm leading-6 bg-white font-semibold focus:outline-none text-gray-700 hover:text-gray-900 dark:bg-gray-900 dark:text-gray-300 dark:hover:text-white flex items-center justify-between shadow-lg border-y border-t-transparent border-b-gray-900/10 dark:bg-gradient-to-b dark:from-[#242F41] dark:to-gray-800 dark:shadow-highlight/4 dark:ring-1 dark:ring-inset dark:ring-white/[0.08] dark:rounded-t-lg dark:border-0"
             onClick={() => {
               if (size.current <= cssOutputButtonHeight) {
                 setSize({ ...size, current: 300 })
@@ -166,26 +166,27 @@ export default function Editor({
               }
             }}
           >
-            Compiled CSS
+            Generated CSS
             <svg
-              className="h-5 w-5 text-gray-400"
-              viewBox="0 0 20 20"
-              fill="currentColor"
+              className={clsx(
+                'w-6 h-6 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200',
+                !cssOutputVisible && 'rotate-180'
+              )}
+              fill="none"
+              viewBox="0 0 24 24"
             >
               <path
-                fillRule="evenodd"
-                d={
-                  cssOutputVisible
-                    ? 'M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'
-                    : 'M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z'
-                }
-                clipRule="evenodd"
+                d="m17 10-5 5-5-5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </button>
           <div
             className={clsx(
-              'relative flex-auto border-t border-gray-200 dark:border-gray-800',
+              'relative flex-auto',
               !cssOutputVisible && 'hidden'
             )}
           >
