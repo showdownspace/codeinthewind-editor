@@ -74,7 +74,12 @@ export function TabBar({
           className="text-sm font-semibold text-gray-500 flex items-center hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           onClick={onTidy}
         >
-          <svg viewBox="0 0 24 24" className="w-6 h-6 mr-1" fill="currentColor">
+          <svg
+            viewBox="0 0 24 24"
+            className="w-6 h-6 mr-1"
+            fill="currentColor"
+            aria-hidden="true"
+          >
             <path
               d="M5 9a2 2 0 0 1 2 2 1 1 0 1 0 2 0 2 2 0 0 1 2-2 1 1 0 1 0 0-2 2 2 0 0 1-2-2 1 1 0 0 0-2 0 2 2 0 0 1-2 2 1 1 0 0 0 0 2Z"
               className="text-gray-400 dark:text-gray-500"
@@ -84,7 +89,7 @@ export function TabBar({
               className="text-gray-300 dark:text-gray-400"
             />
           </svg>
-          Tidy
+          Tidy<span className="sr-only">, and focus editor</span>
         </button>
       </div>
     </div>
