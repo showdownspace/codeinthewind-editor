@@ -6,6 +6,7 @@ export function TabBar({
   isLoading,
   showPreviewTab,
   onChange,
+  onTidy,
 }) {
   return (
     <div
@@ -43,26 +44,49 @@ export function TabBar({
           </TabButton>
         )}
       </div>
-      {isLoading && (
-        <p className="ml-auto">
-          <span className="sr-only">Loading</span>
-          <svg fill="none" viewBox="0 0 24 24" className="w-4 h-4 animate-spin">
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
+      <div className="ml-auto flex items-center">
+        {isLoading && (
+          <p className="mr-4">
+            <span className="sr-only">Loading</span>
+            <svg
+              fill="none"
+              viewBox="0 0 24 24"
+              className="w-4 h-4 animate-spin"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+          </p>
+        )}
+        <button
+          type="button"
+          className="text-sm font-semibold text-gray-500 flex items-center hover:text-gray-700"
+          onClick={onTidy}
+        >
+          <svg viewBox="0 0 24 24" className="w-6 h-6 mr-1" fill="none">
+            <path
+              d="M5 9a2 2 0 0 1 2 2 1 1 0 1 0 2 0 2 2 0 0 1 2-2 1 1 0 1 0 0-2 2 2 0 0 1-2-2 1 1 0 0 0-2 0 2 2 0 0 1-2 2 1 1 0 0 0 0 2Z"
+              fill="#94A3B8"
             />
             <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              d="M11 16a3 3 0 0 1 3 3 1 1 0 1 0 2 0 3 3 0 0 1 3-3 1 1 0 1 0 0-2 3 3 0 0 1-3-3 1 1 0 1 0-2 0 3 3 0 0 1-3 3 1 1 0 1 0 0 2Z"
+              fill="#CBD5E1"
             />
           </svg>
-        </p>
-      )}
+          Tidy
+        </button>
+      </div>
     </div>
   )
 }
@@ -75,7 +99,8 @@ function TabButton({ isActive, onClick, children }) {
         'relative flex py-3 text-sm leading-6 font-semibold focus:outline-none',
         {
           'text-sky-500': isActive,
-          'text-gray-700 hover:text-gray-900 focus:text-gray-900 dark:text-gray-300 dark:hover:text-white': !isActive,
+          'text-gray-700 hover:text-gray-900 focus:text-gray-900 dark:text-gray-300 dark:hover:text-white':
+            !isActive,
         }
       )}
       onClick={onClick}
