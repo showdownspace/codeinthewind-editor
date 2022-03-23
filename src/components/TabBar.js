@@ -10,7 +10,7 @@ export function TabBar({
 }) {
   return (
     <div
-      className="flex items-center flex-none pl-5 pr-4 sm:pl-6 absolute z-10 top-0 left-0 -mb-px antialiased"
+      className="flex items-center flex-none pl-5 sm:pl-6 pr-4 lg:pr-6 absolute z-10 top-0 left-0 -mb-px antialiased"
       style={{
         width,
         fontFeatureSettings: '"cv02", "cv03", "cv04", "cv11"',
