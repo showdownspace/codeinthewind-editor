@@ -71,17 +71,17 @@ export function TabBar({
         )}
         <button
           type="button"
-          className="text-sm font-semibold text-gray-500 flex items-center hover:text-gray-700"
+          className="text-sm font-semibold text-gray-500 flex items-center hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           onClick={onTidy}
         >
-          <svg viewBox="0 0 24 24" className="w-6 h-6 mr-1" fill="none">
+          <svg viewBox="0 0 24 24" className="w-6 h-6 mr-1" fill="currentColor">
             <path
               d="M5 9a2 2 0 0 1 2 2 1 1 0 1 0 2 0 2 2 0 0 1 2-2 1 1 0 1 0 0-2 2 2 0 0 1-2-2 1 1 0 0 0-2 0 2 2 0 0 1-2 2 1 1 0 0 0 0 2Z"
-              fill="#94A3B8"
+              className="text-gray-400 dark:text-gray-500"
             />
             <path
               d="M11 16a3 3 0 0 1 3 3 1 1 0 1 0 2 0 3 3 0 0 1 3-3 1 1 0 1 0 0-2 3 3 0 0 1-3-3 1 1 0 1 0-2 0 3 3 0 0 1-3 3 1 1 0 1 0 0 2Z"
-              fill="#CBD5E1"
+              className="text-gray-300 dark:text-gray-400"
             />
           </svg>
           Tidy
