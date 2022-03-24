@@ -13,6 +13,8 @@ export default function Editor({
   editorRef: inRef,
   cssOutputEditorRef: setCssOutputEditorRef,
   tailwindVersion,
+  onFilterCssOutput,
+  cssOutputFilter,
 }) {
   const editorContainerRef = useRef()
   const editorRef = useRef()
@@ -54,6 +56,7 @@ export default function Editor({
         readOnly: true,
         language: 'tailwindcss',
         renderLineHighlight: false,
+        padding: { top: 49 },
       }
     )
 
@@ -154,10 +157,10 @@ export default function Editor({
             />
           </div>
         </div>
-        <div className="flex-auto flex flex-col ring-1 ring-gray-900/[0.07] rounded-t-lg overflow-hidden dark:rounded-none dark:ring-0">
+        <div className="flex-auto flex flex-col ring-1 ring-gray-900/[0.07] rounded-t-lg overflow-hidden dark:rounded-none dark:ring-0 shadow-[0_2px_11px_rgba(0,0,0,0.1),0_3px_6px_rgba(0,0,0,0.05)]">
           <button
             type="button"
-            className="group h-12 px-6 text-left text-sm leading-6 bg-white font-semibold focus:outline-none text-gray-700 hover:text-gray-900 dark:bg-gray-900 dark:text-gray-300 dark:hover:text-white flex items-center justify-between shadow-lg border-y border-t-transparent border-b-gray-900/10 dark:bg-gradient-to-b dark:from-[#242F41] dark:to-gray-800 dark:shadow-highlight/4 dark:ring-1 dark:ring-inset dark:ring-white/[0.08] dark:rounded-t-lg dark:border-0"
+            className="flex-none group h-12 px-6 text-left text-sm leading-6 bg-white font-semibold focus:outline-none text-gray-700 hover:text-gray-900 dark:bg-gray-900 dark:text-gray-300 dark:hover:text-white flex items-center justify-between border-y border-t-transparent border-b-gray-900/10 dark:bg-gradient-to-b dark:from-[#242F41] dark:to-gray-800 dark:shadow-highlight/4 dark:ring-1 dark:ring-inset dark:ring-white/[0.08] dark:rounded-t-lg dark:border-0"
             onClick={() => {
               if (size.current <= cssOutputButtonHeight) {
                 setSize({ ...size, current: 300 })
@@ -190,9 +193,48 @@ export default function Editor({
               !cssOutputVisible && 'hidden'
             )}
           >
+            <div className="absolute z-10 bg-white/80 backdrop-blur top-0 left-0 right-[14px] select-none flex px-6 space-x-3 py-2.5 border-t border-gray-900/[0.03] dark:bg-gray-800/80">
+              {[
+                ['All'],
+                ['Base', 'base'],
+                ['Components', 'components'],
+                ['Utilities', 'utilities'],
+              ].map(([label, key], index) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={clsx(
+                    'rounded-full text-xs leading-6 py-0.5 px-3 font-semibold',
+                    cssOutputFilter.includes(key) ||
+                      (index === 0 && cssOutputFilter.length === 0)
+                      ? 'bg-sky-50 text-sky-500 dark:bg-gray-100/[0.08] dark:text-white'
+                      : 'text-gray-700 dark:text-gray-400'
+                  )}
+                  onClick={(event) => {
+                    if (index === 0) {
+                      onFilterCssOutput([])
+                    } else {
+                      if (event.metaKey) {
+                        if (cssOutputFilter.includes(key)) {
+                          onFilterCssOutput(
+                            cssOutputFilter.filter((x) => x !== key)
+                          )
+                        } else {
+                          onFilterCssOutput([...cssOutputFilter, key])
+                        }
+                      } else {
+                        onFilterCssOutput([key])
+                      }
+                    }
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             <div
               ref={cssOutputEditorContainerRef}
-              className="absolute inset-0 w-full h-full"
+              className="absolute inset-0 w-full h-full css-output-editor"
             />
           </div>
         </div>

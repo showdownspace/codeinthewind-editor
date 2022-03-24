@@ -64,6 +64,8 @@ function Pen({
     toValidTailwindVersion(initialContent.version)
   )
   const [jit, setJit] = useState(false)
+  const cssOutput = useRef('')
+  const [cssOutputFilter, setCssOutputFilter] = useState([])
 
   useEffect(() => {
     setDirty(true)
@@ -113,14 +115,67 @@ function Pen({
     }
   }, [initialContent.ID])
 
-  const inject = useCallback((content, options) => {
-    previewRef.current.contentWindow.postMessage(content, '*')
-    if (options?.updateCssOutput && content.css && cssOutputEditorRef.current) {
-      cssOutputEditorRef.current.setValue(content.css)
+  const updateCssOutputPanel = useCallback(
+    (css) => {
+      let result = css
+      let re =
+        /\s*\/\*\s*__play_start_(base|components|utilities)__\s*\*\/(.*?)\/\*\s*__play_end_\1__\s*\*\//gs
+      if (cssOutputFilter.length === 0) {
+        result = result.replace(re, (_match, _layerName, layerCss) => layerCss)
+      } else {
+        let chunks = []
+        let match
+        while ((match = re.exec(result)) !== null) {
+          let [, layerName, layerCss] = match
+          if (cssOutputFilter.includes(layerName)) {
+            let trimmedCss = layerCss.trim()
+            if (trimmedCss) {
+              chunks.push(trimmedCss)
+            }
+          }
+        }
+        result = chunks.join('\n\n')
+      }
+      result = result.trim().replace(/\n{3,}/g, '\n\n')
+      if (result.trim() !== '') {
+        result = result + '\n'
+      }
+      cssOutputEditorRef.current.setValue(result)
       let model = cssOutputEditorRef.current.getModel()
-      model.forceTokenization(model.getLineCount())
+      if (jit) {
+        // This prevents a "flash of unhighlighted code" in the editor
+        // but it's very slow on large CSS so we only do it in JIT mode
+        // where the CSS is likely to be an ok size
+        model.forceTokenization(model.getLineCount())
+      }
+      cssOutputEditorRef.current.setScrollPosition({ scrollTop: 0 })
+    },
+    [cssOutputFilter, jit]
+  )
+
+  const inject = useCallback(
+    (content, options) => {
+      previewRef.current.contentWindow.postMessage(content, '*')
+      if (content.css) {
+        cssOutput.current = content.css
+      }
+      if (
+        options?.updateCssOutput &&
+        content.css &&
+        cssOutputEditorRef.current
+      ) {
+        updateCssOutputPanel(content.css)
+      }
+    },
+    [updateCssOutputPanel]
+  )
+
+  useEffect(() => {
+    if (!cssOutputEditorRef.current) {
+      return
     }
-  }, [])
+    updateCssOutputPanel(cssOutput.current)
+  }, [updateCssOutputPanel])
 
   async function compileNow(content) {
     if (content.config) {
@@ -150,7 +205,7 @@ function Pen({
     }
   }
 
-  const compile = useCallback(debounce(compileNow, 200), [])
+  const compile = useCallback(debounce(compileNow, 200), [inject])
 
   const onChange = useCallback(
     (document, content, options) => {
@@ -393,6 +448,8 @@ function Pen({
                   worker={worker}
                   activeTab={activeTab}
                   tailwindVersion={tailwindVersion}
+                  cssOutputFilter={cssOutputFilter}
+                  onFilterCssOutput={setCssOutputFilter}
                 />
               )}
               <div className="absolute inset-0 w-full h-full">

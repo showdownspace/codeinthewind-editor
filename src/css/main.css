@@ -222,6 +222,27 @@ body.cursor-nwse-resize * {
   background-color: transparent !important;
 }
 
+.css-output-editor .monaco-scrollable-element::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 14px;
+  height: 49px;
+  z-index: 1;
+  @apply bg-white/80 backdrop-blur;
+}
+.css-output-editor .monaco-scrollable-element.vs-dark::before {
+  @apply bg-gray-800/80;
+}
+.css-output-editor .decorationsOverviewRuler {
+  z-index: 1;
+}
+.css-output-editor .monaco-scrollable-element .scrollbar {
+  z-index: 2;
+}
+
 .Resizer {
   background-color: theme('colors.gray.200');
   z-index: 1;
