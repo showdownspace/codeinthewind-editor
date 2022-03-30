@@ -1,7 +1,6 @@
 import * as monaco from 'monaco-editor'
+import { requestResponse } from '../utils/workers'
 import { CommandsRegistry } from 'monaco-editor/esm/vs/platform/commands/common/commands'
-import PrettierWorker from 'worker-loader!../workers/prettier.worker.js'
-import { createWorkerQueue } from '../utils/workers'
 import { setupHtmlMode } from './html'
 import { setupCssMode } from './css'
 import { setupJavaScriptMode } from './javascript'
@@ -54,7 +53,7 @@ export function createMonacoEditor({
     },
   }
 
-  disposables.push(registerDocumentFormattingEditProviders())
+  disposables.push(registerDocumentFormattingEditProviders(worker))
 
   const html = setupHtmlMode(
     initialContent.html,
@@ -297,24 +296,22 @@ function setupKeybindings(editor) {
   )
 }
 
-function registerDocumentFormattingEditProviders() {
+function registerDocumentFormattingEditProviders(worker) {
   const disposables = []
-  let prettierWorker
 
   const formattingEditProvider = {
     async provideDocumentFormattingEdits(model, _options, _token) {
-      if (!prettierWorker) {
-        prettierWorker = createWorkerQueue(PrettierWorker)
-      }
-      const { canceled, error, pretty } = await prettierWorker.emit({
-        text: model.getValue(),
-        language: model.getLanguageId(),
+      const { result, error } = await requestResponse(worker.current, {
+        prettier: {
+          text: model.getValue(),
+          language: model.getLanguageId(),
+        },
       })
-      if (canceled || error) return []
+      if (error) return []
       return [
         {
           range: model.getFullModelRange(),
-          text: pretty,
+          text: result,
         },
       ]
     },
@@ -348,9 +345,6 @@ function registerDocumentFormattingEditProviders() {
   return {
     dispose() {
       disposables.forEach((disposable) => disposable.dispose())
-      if (prettierWorker) {
-        prettierWorker.terminate()
-      }
     },
   }
 }

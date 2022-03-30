@@ -45,12 +45,8 @@ function Pen({
   const isLg = useMedia('(min-width: 1024px)')
   const [dirty, setDirty] = useState(false)
   const [renderEditor, setRenderEditor] = useState(false)
-  const [
-    error,
-    setError,
-    setErrorImmediate,
-    cancelSetError,
-  ] = useDebouncedState(undefined, 1000)
+  const [error, setError, setErrorImmediate, cancelSetError] =
+    useDebouncedState(undefined, 1000)
   const editorRef = useRef()
   const [responsiveDesignMode, setResponsiveDesignMode] = useState(
     initialResponsiveSize ? true : false
@@ -359,6 +355,13 @@ function Pen({
                     setActivePane('editor')
                     setActiveTab(tab)
                   }
+                }}
+                onTidy={() => {
+                  editorRef.current.editor.trigger(
+                    '',
+                    'editor.action.formatDocument'
+                  )
+                  editorRef.current.editor.focus()
                 }}
               />
             )}
