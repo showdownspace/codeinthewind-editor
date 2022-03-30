@@ -155,7 +155,11 @@ export default function Editor({
           <path d="M12 6.25H8a1 1 0 0 1-1-1v-1.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1.5a1 1 0 0 1-1 1ZM7.75 10.25h4.5M7.75 13.25h4.5" />
         </svg>
         <span className={clsx(copyCount > 0 && 'opacity-0')}>
-          Copy<span className="sr-only">, then focus editor</span>
+          Copy
+          <span className="sr-only">
+            , {{ html: 'HTML', css: 'CSS', config: 'Config' }[activeTab]}, then
+            focus editor
+          </span>
         </span>
         {copyCount > 0 && (
           <Alert className="absolute inset-0 flex items-center justify-center">
