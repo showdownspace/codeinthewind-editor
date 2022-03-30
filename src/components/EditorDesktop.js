@@ -26,6 +26,8 @@ export default function Editor({
   const [size, setSize] = useState({ current: cssOutputButtonHeight })
   const [cssOutputVisible, setCssOutputVisible] = useState(false)
   const [isCopyButtonVisible, setIsCopyButtonVisible] = useState(false)
+  const [isCssOutputCopyButtonVisible, setIsCssOutputCopyButtonVisible] =
+    useState(false)
   const [copyCount, setCopyCount] = useState(0)
 
   useEffect(() => {
@@ -181,53 +183,11 @@ export default function Editor({
               ref={editorContainerRef}
               className="absolute inset-0 w-full h-full"
             />
-            <button
-              type="button"
-              className={clsx(
-                'absolute top-4 right-[calc(14px+1rem)] rounded-full bg-gray-50 text-gray-500 text-xs font-semibold leading-6 py-0.5 pl-2 pr-2.5 flex items-center hover:bg-gray-100 transition-opacity select-none dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600',
-                !isCopyButtonVisible &&
-                  'opacity-0 pointer-events-none focus:opacity-100 focus:pointer-events-auto'
-              )}
-              onClick={() => {
-                navigator.clipboard
-                  .writeText(editorRef.current.editor.getModel().getValue())
-                  .then(() => {
-                    setCopyCount((c) => c + 1)
-                  })
-                  .finally(() => {
-                    editorRef.current.editor.focus()
-                  })
-              }}
-            >
-              <svg
-                viewBox="0 0 20 20"
-                className={clsx(
-                  'w-5 h-5 text-gray-400 flex-none mr-1',
-                  copyCount > 0 && 'opacity-0'
-                )}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M7 4.75H5.75a2 2 0 0 0-2 2v8.5a2 2 0 0 0 2 2h8.5a2 2 0 0 0 2-2v-8.5a2 2 0 0 0-2-2H13" />
-                <path d="M12 6.25H8a1 1 0 0 1-1-1v-1.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1.5a1 1 0 0 1-1 1ZM7.75 10.25h4.5M7.75 13.25h4.5" />
-              </svg>
-              <span className={clsx(copyCount > 0 && 'opacity-0')}>
-                Copy
-                <span className="sr-only">
-                  , {{ html: 'HTML', css: 'CSS', config: 'Config' }[activeTab]},
-                  then focus editor
-                </span>
-              </span>
-              {copyCount > 0 && (
-                <Alert className="absolute inset-0 flex items-center justify-center">
-                  Copied!
-                </Alert>
-              )}
-            </button>
+            <CopyButton
+              editorRef={editorRef}
+              className="absolute top-4 right-[calc(14px+1rem)]"
+              isVisible={isCopyButtonVisible}
+            />
           </div>
         </div>
         <div className="flex-auto flex flex-col ring-1 ring-gray-900/[0.07] rounded-t-lg overflow-hidden dark:rounded-none dark:ring-0 shadow-[0_2px_11px_rgba(0,0,0,0.1),0_3px_6px_rgba(0,0,0,0.05)]">
@@ -265,6 +225,12 @@ export default function Editor({
               'relative flex-auto',
               !cssOutputVisible && 'hidden'
             )}
+            onMouseMove={() => {
+              if (!isCssOutputCopyButtonVisible) {
+                setIsCssOutputCopyButtonVisible(true)
+              }
+            }}
+            onMouseLeave={() => setIsCssOutputCopyButtonVisible(false)}
           >
             <div className="absolute z-10 bg-white/80 backdrop-blur top-0 left-0 right-[14px] select-none flex pl-6 pr-2.5 py-2.5 border-t border-gray-900/[0.03] dark:bg-gray-800/80 justify-between">
               <div className="flex space-x-3">
@@ -306,7 +272,11 @@ export default function Editor({
                   </button>
                 ))}
               </div>
-              <CopyButton editorRef={cssOutputEditorRef} />
+              <CopyButton
+                editorRef={cssOutputEditorRef}
+                className="relative"
+                isVisible={isCssOutputCopyButtonVisible}
+              />
             </div>
             <div
               ref={cssOutputEditorContainerRef}
@@ -319,7 +289,7 @@ export default function Editor({
   )
 }
 
-function CopyButton({ editorRef }) {
+function CopyButton({ editorRef, className, isVisible }) {
   let [copyCount, setCopyCount] = useState(0)
 
   useEffect(() => {
@@ -335,10 +305,19 @@ function CopyButton({ editorRef }) {
   return (
     <button
       type="button"
-      className="relative rounded-full bg-gray-50 text-gray-500 text-xs font-semibold leading-6 py-0.5 pl-2 pr-2.5 flex items-center hover:bg-gray-100 transition-opacity select-none dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
+      className={clsx(
+        'rounded-full bg-gray-50 text-gray-500 text-xs font-semibold leading-6 py-0.5 pl-2 pr-2.5 flex items-center hover:bg-gray-100 transition-opacity select-none dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600',
+        !isVisible &&
+          'opacity-0 pointer-events-none focus:opacity-100 focus:pointer-events-auto',
+        className
+      )}
       onClick={() => {
         navigator.clipboard
-          .writeText(editorRef.current.getModel().getValue() || '\n')
+          .writeText(
+            (editorRef.current.editor || editorRef.current)
+              .getModel()
+              .getValue() || '\n'
+          )
           .then(() => {
             setCopyCount((c) => c + 1)
           })
