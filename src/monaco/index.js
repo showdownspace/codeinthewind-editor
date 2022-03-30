@@ -196,7 +196,7 @@ export function createMonacoEditor({
     theme: getTheme() === 'dark' ? 'tw-dark' : 'tw-light',
     fixedOverflowWidgets: true,
     scrollbar: {
-      horizontalScrollbarSize: 18,
+      horizontalScrollbarSize: 21,
     },
   })
   disposables.push(editor)
