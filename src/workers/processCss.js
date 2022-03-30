@@ -31,6 +31,31 @@ const applyModule2 = require('tailwindcss-v2/lib/lib/substituteClassApplyAtRules
 const apply1 = applyModule1.default
 const apply2 = applyModule2.default
 
+// https://github.com/tailwindlabs/tailwindcss/blob/315e3a2445d682b2da9ca93fda77252fe32879ff/src/cli.js#L26-L42
+function formatNodes(root) {
+  indentRecursive(root)
+  if (root.first) {
+    root.first.raws.before = ''
+  }
+}
+
+function indentRecursive(node, indent = 0) {
+  node.each &&
+    node.each((child, i) => {
+      if (
+        !child.raws.before ||
+        !child.raws.before.trim() ||
+        child.raws.before.includes('\n')
+      ) {
+        child.raws.before = `\n${
+          node.type !== 'rule' && i > 0 ? '\n' : ''
+        }${'  '.repeat(indent)}`
+      }
+      child.raws.after = `\n${'  '.repeat(indent)}`
+      indentRecursive(child, indent + 1)
+    })
+}
+
 export async function processCss(
   configInput,
   htmlInput,
@@ -67,9 +92,10 @@ export async function processCss(
 
   let jitContext
   if (jit && !skipIntelliSense) {
-    jitContext = require('tailwindcss-v2/lib/jit/lib/setupContextUtils').createContext(
-      resolveConfig(config)
-    )
+    jitContext =
+      require('tailwindcss-v2/lib/jit/lib/setupContextUtils').createContext(
+        resolveConfig(config)
+      )
   }
 
   const applyComplexClasses =
@@ -128,21 +154,43 @@ export async function processCss(
     }
   }
 
+  function addLayerBoundaryComments(root) {
+    root.walkAtRules((atRule) => {
+      if (
+        (atRule.name === 'tailwind' || atRule.name === 'layer') &&
+        ['base', 'components', 'utilities'].includes(atRule.params.trim())
+      ) {
+        atRule.before(
+          postcss.comment({ text: `__play_start_${atRule.params.trim()}__` })
+        )
+        atRule.after(
+          postcss.comment({ text: `__play_end_${atRule.params.trim()}__` })
+        )
+      }
+    })
+  }
+
   let css
   let lspRoot
 
   if (!jit) {
-    let result = await postcss([tailwindcss(config), autoprefixer()]).process(
-      cssInput,
-      {
-        from: undefined,
-      }
-    )
+    let result = await postcss([
+      addLayerBoundaryComments,
+      tailwindcss(config),
+      autoprefixer(),
+    ]).process(cssInput, {
+      from: undefined,
+    })
     css = result.css
     lspRoot = result.root
   } else {
     css = (
-      await postcss([tailwindcss(config), autoprefixer()]).process(cssInput, {
+      await postcss([
+        addLayerBoundaryComments,
+        tailwindcss(config),
+        formatNodes,
+        autoprefixer(),
+      ]).process(cssInput, {
         from: VIRTUAL_SOURCE_PATH,
       })
     ).css

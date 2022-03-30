@@ -45,7 +45,7 @@ export function setupHtmlMode(content, onChange, worker, getEditor) {
             lines[index].substr(selections[i].positionColumn - 1)
         }
 
-        onChange(lines.join('\n'))
+        onChange(lines.join('\n'), { transient: true })
 
         if (!item._resolved) {
           let { result } = await requestResponse(worker.current, {

@@ -159,7 +159,7 @@ addEventListener('message', async (event) => {
     const css = event.data._recompile ? lastCss : event.data.css
     const config = event.data._recompile ? lastConfig : event.data.config
 
-    const isFreshBuild = css !== lastCss || config !== lastConfig
+    const isFreshBuild = !event.data.transient
 
     lastHtml = html
     lastCss = css
