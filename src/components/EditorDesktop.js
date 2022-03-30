@@ -241,7 +241,7 @@ export default function Editor({
                   ['Utilities', 'utilities'],
                 ].map(([label, key], index) => (
                   <button
-                    key={key}
+                    key={label}
                     type="button"
                     className={clsx(
                       'rounded-full text-xs leading-6 py-0.5 px-3 font-semibold',
