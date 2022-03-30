@@ -4,6 +4,7 @@ import * as monaco from 'monaco-editor'
 import { onDidChangeTheme, getTheme } from '../utils/theme'
 import SplitPane from 'react-split-pane'
 import clsx from 'clsx'
+import Alert from '@reach/alert'
 
 export default function Editor({
   initialContent = {},
@@ -193,44 +194,47 @@ export default function Editor({
               !cssOutputVisible && 'hidden'
             )}
           >
-            <div className="absolute z-10 bg-white/80 backdrop-blur top-0 left-0 right-[14px] select-none flex px-6 space-x-3 py-2.5 border-t border-gray-900/[0.03] dark:bg-gray-800/80">
-              {[
-                ['All'],
-                ['Base', 'base'],
-                ['Components', 'components'],
-                ['Utilities', 'utilities'],
-              ].map(([label, key], index) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={clsx(
-                    'rounded-full text-xs leading-6 py-0.5 px-3 font-semibold',
-                    cssOutputFilter.includes(key) ||
-                      (index === 0 && cssOutputFilter.length === 0)
-                      ? 'bg-sky-50 text-sky-500 dark:bg-gray-100/[0.08] dark:text-white'
-                      : 'text-gray-700 dark:text-gray-400'
-                  )}
-                  onClick={(event) => {
-                    if (index === 0) {
-                      onFilterCssOutput([])
-                    } else {
-                      if (event.metaKey) {
-                        if (cssOutputFilter.includes(key)) {
-                          onFilterCssOutput(
-                            cssOutputFilter.filter((x) => x !== key)
-                          )
-                        } else {
-                          onFilterCssOutput([...cssOutputFilter, key])
-                        }
+            <div className="absolute z-10 bg-white/80 backdrop-blur top-0 left-0 right-[14px] select-none flex pl-6 pr-2.5 py-2.5 border-t border-gray-900/[0.03] dark:bg-gray-800/80 justify-between">
+              <div className="flex space-x-3">
+                {[
+                  ['All'],
+                  ['Base', 'base'],
+                  ['Components', 'components'],
+                  ['Utilities', 'utilities'],
+                ].map(([label, key], index) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={clsx(
+                      'rounded-full text-xs leading-6 py-0.5 px-3 font-semibold',
+                      cssOutputFilter.includes(key) ||
+                        (index === 0 && cssOutputFilter.length === 0)
+                        ? 'bg-sky-50 text-sky-500 dark:bg-gray-100/[0.08] dark:text-white'
+                        : 'text-gray-700 dark:text-gray-400'
+                    )}
+                    onClick={(event) => {
+                      if (index === 0) {
+                        onFilterCssOutput([])
                       } else {
-                        onFilterCssOutput([key])
+                        if (event.metaKey) {
+                          if (cssOutputFilter.includes(key)) {
+                            onFilterCssOutput(
+                              cssOutputFilter.filter((x) => x !== key)
+                            )
+                          } else {
+                            onFilterCssOutput([...cssOutputFilter, key])
+                          }
+                        } else {
+                          onFilterCssOutput([key])
+                        }
                       }
-                    }
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <CopyButton editorRef={cssOutputEditorRef} />
             </div>
             <div
               ref={cssOutputEditorContainerRef}
@@ -240,5 +244,62 @@ export default function Editor({
         </div>
       </SplitPane>
     </div>
+  )
+}
+
+function CopyButton({ editorRef }) {
+  let [copyCount, setCopyCount] = useState(0)
+
+  useEffect(() => {
+    if (copyCount === 0) return
+    let handle = window.setTimeout(() => {
+      setCopyCount(0)
+    }, 1500)
+    return () => {
+      window.clearTimeout(handle)
+    }
+  }, [copyCount])
+
+  return (
+    <button
+      type="button"
+      className="relative rounded-full bg-gray-50 text-gray-500 text-xs font-semibold leading-6 py-0.5 pl-2 pr-2.5 flex items-center hover:bg-gray-100 transition-opacity select-none dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
+      onClick={() => {
+        navigator.clipboard
+          .writeText(editorRef.current.getModel().getValue() || '\n')
+          .then(() => {
+            setCopyCount((c) => c + 1)
+          })
+          .finally(() => {
+            editorRef.current.focus()
+          })
+      }}
+    >
+      <svg
+        viewBox="0 0 20 20"
+        className={clsx(
+          'w-5 h-5 text-gray-400 flex-none mr-1',
+          copyCount > 0 && 'opacity-0'
+        )}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M7 4.75H5.75a2 2 0 0 0-2 2v8.5a2 2 0 0 0 2 2h8.5a2 2 0 0 0 2-2v-8.5a2 2 0 0 0-2-2H13" />
+        <path d="M12 6.25H8a1 1 0 0 1-1-1v-1.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1.5a1 1 0 0 1-1 1ZM7.75 10.25h4.5M7.75 13.25h4.5" />
+      </svg>
+      <span className={clsx(copyCount > 0 && 'opacity-0')}>
+        Copy
+        <span className="sr-only">, then focus editor</span>
+      </span>
+      {copyCount > 0 && (
+        <Alert className="absolute inset-0 flex items-center justify-center">
+          Copied!
+        </Alert>
+      )}
+    </button>
   )
 }
