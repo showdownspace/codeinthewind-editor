@@ -26,6 +26,7 @@ import { getVariants } from '../utils/getVariants'
 import { parseConfig } from './parseConfig'
 import { toValidTailwindVersion } from '../utils/toValidTailwindVersion'
 import { isObject } from '../utils/object'
+import { format } from '../monaco/format'
 
 const compileWorker = createWorkerQueue(CompileWorker)
 
@@ -128,6 +129,24 @@ addEventListener('message', async (event) => {
     }
 
     return postMessage({ _id: event.data._id, result })
+  }
+
+  if (event.data.prettier) {
+    try {
+      return postMessage({
+        _id: event.data._id,
+        result: await format(
+          state,
+          event.data.prettier.text,
+          event.data.prettier.language
+        ),
+      })
+    } catch (error) {
+      return postMessage({
+        _id: event.data._id,
+        error,
+      })
+    }
   }
 
   if (

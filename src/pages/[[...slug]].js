@@ -418,6 +418,13 @@ function Pen({
                     setActiveTab(tab)
                   }
                 }}
+                onTidy={() => {
+                  editorRef.current.editor.trigger(
+                    '',
+                    'editor.action.formatDocument'
+                  )
+                  editorRef.current.editor.focus()
+                }}
               />
             )}
             <SplitPane
