@@ -282,7 +282,7 @@ export default function Editor({
                       cssOutputFilter.includes(key) ||
                         (index === 0 && cssOutputFilter.length === 0)
                         ? 'bg-sky-50 text-sky-500 dark:bg-gray-100/[0.08] dark:text-white'
-                        : 'text-gray-700 dark:text-gray-400'
+                        : 'text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300'
                     )}
                     onClick={(event) => {
                       if (index === 0) {
