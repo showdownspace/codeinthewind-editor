@@ -185,7 +185,7 @@ export default function Editor({
             />
             <CopyButton
               editorRef={editorRef}
-              className="absolute top-4 right-[calc(14px+1rem)]"
+              className="absolute top-2.5 right-[calc(14px+0.625rem)]"
               isVisible={isCopyButtonVisible}
             />
           </div>
