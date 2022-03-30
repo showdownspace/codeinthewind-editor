@@ -123,7 +123,7 @@ export default function Editor({
       <button
         type="button"
         className={clsx(
-          'absolute top-4 right-4 rounded-full bg-gray-50 text-gray-500 text-xs font-semibold leading-6 py-0.5 pl-2 pr-2.5 flex items-center hover:bg-gray-100 transition-opacity select-none dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600',
+          'absolute top-4 right-[calc(14px+1rem)] rounded-full bg-gray-50 text-gray-500 text-xs font-semibold leading-6 py-0.5 pl-2 pr-2.5 flex items-center hover:bg-gray-100 transition-opacity select-none dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600',
           !isCopyButtonVisible &&
             'opacity-0 pointer-events-none focus:opacity-100 focus:pointer-events-auto'
         )}
