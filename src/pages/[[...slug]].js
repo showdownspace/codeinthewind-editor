@@ -176,7 +176,7 @@ function Pen({
     if (!cssOutputEditorRef.current) {
       return
     }
-    updateCssOutputPanel(cssOutput.current)
+    updateCssOutputPanel(cssOutput.current, { forceTokenization: Boolean(jit) })
   }, [cssOutputFilter])
 
   async function compileNow(content) {
