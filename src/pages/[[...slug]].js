@@ -116,7 +116,7 @@ function Pen({
   }, [initialContent.ID])
 
   const updateCssOutputPanel = useCallback(
-    (css) => {
+    (css, options) => {
       let result = css
       let re =
         /\s*\/\*\s*__play_start_(base|components|utilities)__\s*\*\/(.*?)\/\*\s*__play_end_\1__\s*\*\//gs
@@ -142,7 +142,7 @@ function Pen({
       }
       cssOutputEditorRef.current.setValue(result)
       let model = cssOutputEditorRef.current.getModel()
-      if (jit) {
+      if (options?.forceTokenization) {
         // This prevents a "flash of unhighlighted code" in the editor
         // but it's very slow on large CSS so we only do it in JIT mode
         // where the CSS is likely to be an ok size
@@ -150,7 +150,7 @@ function Pen({
       }
       cssOutputEditorRef.current.setScrollPosition({ scrollTop: 0 })
     },
-    [cssOutputFilter, jit]
+    [cssOutputFilter]
   )
 
   const inject = useCallback(
@@ -164,7 +164,9 @@ function Pen({
         content.css &&
         cssOutputEditorRef.current
       ) {
-        updateCssOutputPanel(content.css)
+        updateCssOutputPanel(content.css, {
+          forceTokenization: Boolean(options?.jit),
+        })
       }
     },
     [updateCssOutputPanel]
@@ -175,7 +177,7 @@ function Pen({
       return
     }
     updateCssOutputPanel(cssOutput.current)
-  }, [updateCssOutputPanel])
+  }, [cssOutputFilter])
 
   async function compileNow(content) {
     if (content.config) {
@@ -201,7 +203,10 @@ function Pen({
     setErrorImmediate()
     setJit(Boolean(jit))
     if (css || html) {
-      inject({ css, html }, { updateCssOutput: !content.transient })
+      inject(
+        { css, html },
+        { updateCssOutput: !content.transient, jit: Boolean(jit) }
+      )
     }
   }
 
@@ -211,7 +216,7 @@ function Pen({
     (document, content, options) => {
       setDirty(true)
       if (document === 'html' && !jit) {
-        inject({ html: content.html })
+        inject({ html: content.html }, { jit })
       } else {
         compile({
           html: content.html,
