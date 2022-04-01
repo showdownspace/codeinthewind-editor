@@ -155,17 +155,41 @@ export async function processCss(
   }
 
   function addLayerBoundaryComments(root) {
-    root.walkAtRules((atRule) => {
-      if (
-        (atRule.name === 'tailwind' || atRule.name === 'layer') &&
-        ['base', 'components', 'utilities'].includes(atRule.params.trim())
-      ) {
-        atRule.before(
-          postcss.comment({ text: `__play_start_${atRule.params.trim()}__` })
-        )
-        atRule.after(
-          postcss.comment({ text: `__play_end_${atRule.params.trim()}__` })
-        )
+    let supportedLayers = ['base', 'components', 'utilities']
+    if (tailwindVersion !== '3') {
+      supportedLayers.push('screens')
+    }
+    root.walkAtRules(/(tailwind|layer)/, (atRule) => {
+      let layer = atRule.params.trim()
+      if (supportedLayers.includes(layer)) {
+        if (layer === 'screens') {
+          layer = 'utilities'
+        }
+        atRule.before(postcss.comment({ text: `__play_start_${layer}__` }))
+        atRule.after(postcss.comment({ text: `__play_end_${layer}__` }))
+      }
+    })
+  }
+
+  function addTailwindScreensDirective(root) {
+    let hasDirective = false
+    root.walkAtRules('tailwind', (node) => {
+      if (node.params.trim() === 'screens') {
+        hasDirective = true
+        return false
+      }
+    })
+    if (!hasDirective) {
+      root.append('@tailwind screens;')
+    }
+  }
+
+  function addNodeLayerComments(root) {
+    root.each((node) => {
+      let layer = node.raws?.tailwind?.parentLayer
+      if (layer) {
+        node.before(postcss.comment({ text: `__play_start_${layer}__` }))
+        node.after(postcss.comment({ text: `__play_end_${layer}__` }))
       }
     })
   }
@@ -174,23 +198,30 @@ export async function processCss(
   let lspRoot
 
   if (!jit) {
-    let result = await postcss([
-      addLayerBoundaryComments,
-      tailwindcss(config),
-      autoprefixer(),
-    ]).process(cssInput, {
+    let result = await postcss(
+      [
+        tailwindVersion !== '3' && addTailwindScreensDirective,
+        addLayerBoundaryComments,
+        tailwindcss(config),
+        autoprefixer(),
+      ].filter(Boolean)
+    ).process(cssInput, {
       from: undefined,
     })
     css = result.css
     lspRoot = result.root
   } else {
     css = (
-      await postcss([
-        addLayerBoundaryComments,
-        tailwindcss(config),
-        formatNodes,
-        autoprefixer(),
-      ]).process(cssInput, {
+      await postcss(
+        [
+          tailwindVersion !== '3' && addTailwindScreensDirective,
+          addLayerBoundaryComments,
+          tailwindcss(config),
+          formatNodes,
+          autoprefixer(),
+          addNodeLayerComments,
+        ].filter(Boolean)
+      ).process(cssInput, {
         from: VIRTUAL_SOURCE_PATH,
       })
     ).css
