@@ -5,6 +5,7 @@ import { onDidChangeTheme, getTheme } from '../utils/theme'
 import SplitPane from 'react-split-pane'
 import clsx from 'clsx'
 import Alert from '@reach/alert'
+import { extractCss } from '../utils/extractCss'
 
 export default function Editor({
   initialContent = {},
@@ -16,6 +17,7 @@ export default function Editor({
   tailwindVersion,
   onFilterCssOutput,
   cssOutputFilter,
+  initialCssOutput = '',
 }) {
   const editorContainerRef = useRef()
   const editorRef = useRef()
@@ -60,6 +62,7 @@ export default function Editor({
         fixedOverflowWidgets: true,
         readOnly: true,
         language: 'tailwindcss',
+        value: extractCss(initialCssOutput, cssOutputFilter),
         renderLineHighlight: false,
         padding: { top: 49 },
       }

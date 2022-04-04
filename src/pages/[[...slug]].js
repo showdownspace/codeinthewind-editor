@@ -21,6 +21,7 @@ import { get } from '../utils/database'
 import { toValidTailwindVersion } from '../utils/toValidTailwindVersion'
 import Head from 'next/head'
 import { getDefaultContent } from '../utils/getDefaultContent'
+import { extractCss } from '../utils/extractCss'
 
 const HEADER_HEIGHT = 60 - 1
 const TAB_BAR_HEIGHT = 40
@@ -117,30 +118,7 @@ function Pen({
 
   const updateCssOutputPanel = useCallback(
     (css, options) => {
-      let result = css
-      let re =
-        /\s*\/\*\s*__play_start_(base|components|utilities)__\s*\*\/(.*?)\/\*\s*__play_end_\1__\s*\*\//gs
-      if (cssOutputFilter.length === 0) {
-        result = result.replace(re, (_match, _layerName, layerCss) => layerCss)
-      } else {
-        let chunks = []
-        let match
-        while ((match = re.exec(result)) !== null) {
-          let [, layerName, layerCss] = match
-          if (cssOutputFilter.includes(layerName)) {
-            let trimmedCss = layerCss.trim()
-            if (trimmedCss) {
-              chunks.push(trimmedCss)
-            }
-          }
-        }
-        result = chunks.join('\n\n')
-      }
-      result = result.trim().replace(/\n{3,}/g, '\n\n')
-      if (result.trim() !== '') {
-        result = result + '\n'
-      }
-      cssOutputEditorRef.current.setValue(result)
+      cssOutputEditorRef.current.setValue(extractCss(css, cssOutputFilter))
       let model = cssOutputEditorRef.current.getModel()
       if (options?.forceTokenization) {
         // This prevents a "flash of unhighlighted code" in the editor
@@ -449,21 +427,24 @@ function Pen({
                   : 'Resizer-collapsed'
               }
             >
-              {renderEditor && (
-                <Editor
-                  editorRef={(ref) => (editorRef.current = ref)}
-                  cssOutputEditorRef={(ref) =>
-                    (cssOutputEditorRef.current = ref)
-                  }
-                  initialContent={initialContent}
-                  onChange={onChange}
-                  worker={worker}
-                  activeTab={activeTab}
-                  tailwindVersion={tailwindVersion}
-                  cssOutputFilter={cssOutputFilter}
-                  onFilterCssOutput={setCssOutputFilter}
-                />
-              )}
+              <div className="flex flex-auto">
+                {renderEditor && (
+                  <Editor
+                    editorRef={(ref) => (editorRef.current = ref)}
+                    cssOutputEditorRef={(ref) =>
+                      (cssOutputEditorRef.current = ref)
+                    }
+                    initialCssOutput={cssOutput.current}
+                    initialContent={initialContent}
+                    onChange={onChange}
+                    worker={worker}
+                    activeTab={activeTab}
+                    tailwindVersion={tailwindVersion}
+                    cssOutputFilter={cssOutputFilter}
+                    onFilterCssOutput={setCssOutputFilter}
+                  />
+                )}
+              </div>
               <div className="absolute inset-0 w-full h-full">
                 <Preview
                   ref={previewRef}
