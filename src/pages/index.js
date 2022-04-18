@@ -20,7 +20,6 @@ import { getLayoutQueryString } from '../utils/getLayoutQueryString'
 import { get } from '../utils/database'
 import { toValidTailwindVersion } from '../utils/toValidTailwindVersion'
 import Head from 'next/head'
-import { getDefaultContent } from '../utils/getDefaultContent'
 import { extractCss } from '../utils/extractCss'
 
 const HEADER_HEIGHT = 60 - 1
@@ -368,7 +367,7 @@ function Pen({
           compileNow({ _recompile: true, tailwindVersion: version })
         }}
       >
-        <Share
+        {/* <Share
           editorRef={editorRef}
           onShareStart={onShareStart}
           onShareComplete={onShareComplete}
@@ -378,7 +377,7 @@ function Pen({
           responsiveSize={responsiveDesignMode ? responsiveSize : undefined}
           activeTab={activeTab}
           tailwindVersion={tailwindVersion}
-        />
+        /> */}
       </Header>
       <main className="flex-auto relative border-t border-gray-200 dark:border-gray-800">
         {initialContent && typeof size.current !== 'undefined' ? (
@@ -484,7 +483,7 @@ export default function App({ errorCode, ...props }) {
   return <Pen {...props} />
 }
 
-export async function getServerSideProps({ params, res, query }) {
+export async function getServerSideProps_DISABLED({ params, res, query }) {
   const layoutProps = {
     initialLayout: ['vertical', 'horizontal', 'preview'].includes(query.layout)
       ? query.layout
@@ -548,5 +547,20 @@ export async function getServerSideProps({ params, res, query }) {
         errorCode: error.status || 500,
       },
     }
+  }
+}
+
+export async function getStaticProps(context) {
+  const layoutProps = {
+    initialLayout: 'vertical',
+    initialResponsiveSize: { width: 540, height: 720 },
+    initialActiveTab: 'html',
+  }
+  const { getDefaultContent } = await import('../utils/getDefaultContent')
+  return {
+    props: {
+      initialContent: await getDefaultContent(),
+      ...layoutProps,
+    },
   }
 }

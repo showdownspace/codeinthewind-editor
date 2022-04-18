@@ -1,4 +1,4 @@
-import { Logo } from './Logo'
+import { Logo } from './LogoEvent'
 import clsx from 'clsx'
 import { toggleTheme } from '../utils/theme'
 import tailwind1 from 'tailwindcss-v1/package.json?fields=version'
