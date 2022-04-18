@@ -39,12 +39,12 @@ export function TabBar({
         >
           CSS
         </TabButton>
-        <TabButton
+        {/* <TabButton
           isActive={activeTab === 'config'}
           onClick={() => onChange('config')}
         >
           Config
-        </TabButton>
+        </TabButton> */}
         {showPreviewTab && (
           <TabButton
             isActive={activeTab === 'preview'}
