@@ -40,6 +40,7 @@
     "eslint-plugin-jsx-a11y": "6.x",
     "eslint-plugin-react": "7.x",
     "eslint-plugin-react-hooks": "2.x",
+    "firebase": "^9.6.11",
     "is-mobile": "^2.2.2",
     "klona": "^2.0.4",
     "line-column": "^1.0.2",
