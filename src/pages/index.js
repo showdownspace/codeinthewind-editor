@@ -556,7 +556,9 @@ export async function getStaticProps(context) {
     initialResponsiveSize: { width: 540, height: 720 },
     initialActiveTab: 'html',
   }
-  const { getDefaultContent } = await import('../utils/getDefaultContent')
+  const { getDefaultContent } = await import(
+    '../utils/getDefaultContentForCitw'
+  )
   return {
     props: {
       initialContent: await getDefaultContent(),
