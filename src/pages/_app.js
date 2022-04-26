@@ -10,6 +10,35 @@ if (typeof window !== 'undefined') {
   require('../workers/subworkers')
 }
 
+if (typeof window !== 'undefined') {
+  /**
+   * Work around https://github.com/tailwindlabs/play.tailwindcss.com/issues/47
+   */
+  const issue47Workaround = async () => {
+    if (process.env.NODE_ENV === 'production') {
+      return
+    }
+    for (let i = 0; i < 100; i++) {
+      const text =
+        document
+          .querySelector('nextjs-portal')
+          ?.shadowRoot?.querySelector('.nextjs-container-errors-header')
+          ?.textContent ?? ''
+      if (text.includes('Parsing successful!')) {
+        const close = document
+          .querySelector('nextjs-portal')
+          ?.shadowRoot?.querySelector('[aria-label="Close"]')
+        if (close) {
+          close.click()
+          return
+        }
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    }
+  }
+  issue47Workaround()
+}
+
 function v(href) {
   return `${href}?v=${FAVICON_VERSION}`
 }
