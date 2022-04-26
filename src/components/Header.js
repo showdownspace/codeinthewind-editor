@@ -1,4 +1,5 @@
 import { Logo } from './LogoEvent'
+import { CodeInTheWindStatus } from '../codeinthewind'
 import clsx from 'clsx'
 import { toggleTheme } from '../utils/theme'
 import tailwind1 from 'tailwindcss-v1/package.json?fields=version'
@@ -28,6 +29,7 @@ export function Header({
     >
       <div className="flex-auto flex items-center min-w-0 space-x-6">
         <Logo className="flex-none text-black dark:text-white" />
+        <CodeInTheWindStatus />
         {children}
       </div>
       <div className="flex items-center">

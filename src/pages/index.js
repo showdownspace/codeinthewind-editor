@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useIsomorphicLayoutEffect } from '../hooks/useIsomorphicLayoutEffect'
 import Worker from 'worker-loader!../workers/postcss.worker.js'
 import { requestResponse } from '../utils/workers'
@@ -21,6 +21,10 @@ import { get } from '../utils/database'
 import { toValidTailwindVersion } from '../utils/toValidTailwindVersion'
 import Head from 'next/head'
 import { extractCss } from '../utils/extractCss'
+import {
+  synchronizeToBackend,
+  useCodeInTheWindStore,
+} from '../codeinthewind/store'
 
 const HEADER_HEIGHT = 60 - 1
 const TAB_BAR_HEIGHT = 40
@@ -28,6 +32,7 @@ const RESIZER_SIZE = 1
 const DEFAULT_RESPONSIVE_SIZE = { width: 540, height: 720 }
 
 function Pen({
+  synchronizeToken,
   initialContent,
   initialPath,
   initialLayout,
@@ -134,6 +139,9 @@ function Pen({
     (content, options) => {
       previewRef.current.contentWindow.postMessage(content, '*')
       if (content.css) {
+        synchronizeToBackend(synchronizeToken, {
+          compiledCss: content.css,
+        })
         cssOutput.current = content.css
       }
       if (
@@ -192,6 +200,10 @@ function Pen({
   const onChange = useCallback(
     (document, content, options) => {
       setDirty(true)
+      synchronizeToBackend(synchronizeToken, {
+        html: content.html,
+        css: content.css,
+      })
       if (document === 'html' && !jit) {
         inject({ html: content.html }, { jit })
       } else {
@@ -205,7 +217,7 @@ function Pen({
         })
       }
     },
-    [inject, compile, jit, tailwindVersion]
+    [inject, compile, jit, tailwindVersion, synchronizeToken]
   )
 
   useEffect(() => {
@@ -476,11 +488,53 @@ function Pen({
   )
 }
 
-export default function App({ errorCode, ...props }) {
+export function App({ errorCode, ...props }) {
   if (errorCode) {
     return <Error statusCode={errorCode} />
   }
   return <Pen {...props} />
+}
+
+export default function AppCodeInTheWind({ errorCode, ...props }) {
+  const { synchronizeToken, overrideInitialContent } = useCodeInTheWindStore()
+  const initialContent = useMemo(() => {
+    return overrideInitialContent
+      ? {
+          ...props.initialContent,
+          ...overrideInitialContent,
+        }
+      : props.initialContent
+  }, [overrideInitialContent, props.initialContent])
+  const pen = useMemo(() => {
+    if (errorCode) {
+      return <Error statusCode={errorCode} />
+    }
+    if (!synchronizeToken) {
+      return (
+        <>
+          <Header
+            layout={'vertical'}
+            onChangeLayout={() => {}}
+            responsiveDesignMode={true}
+            onToggleResponsiveDesignMode={() => {}}
+            tailwindVersion={'…'}
+            onChangeTailwindVersion={() => {}}
+          />
+          <div className="py-3 px-5 text-white/50 text-3xl">
+            Welcome to Code in the Wind!
+          </div>
+        </>
+      )
+    }
+    return (
+      <Pen
+        {...props}
+        initialContent={initialContent}
+        synchronizeToken={synchronizeToken}
+      />
+    )
+  }, [props, errorCode, synchronizeToken, initialContent])
+  return pen
 }
 
 export async function getServerSideProps_DISABLED({ params, res, query }) {
