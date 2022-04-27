@@ -65,6 +65,28 @@ export async function go() {
     }
   }
 
+  async function savePresence() {
+    try {
+      const presenceRef = child(roomRef, `presence/${user.uid}`)
+      await set(presenceRef, serverTimestamp())
+    } catch (error) {
+      console.error('Unable to save presence info', error)
+    }
+  }
+
+  async function saveProfile() {
+    try {
+      const presenceRef = child(roomRef, `profiles/${user.uid}`)
+      await set(presenceRef, { name: userName })
+    } catch (error) {
+      console.error('Unable to save profile info', error)
+    }
+  }
+
+  savePresence()
+  saveProfile()
+  setInterval(() => savePresence(), 10000)
+
   for (;;) {
     try {
       const keysToUpdate = Object.keys(pendingDataToSync)
