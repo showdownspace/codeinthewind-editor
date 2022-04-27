@@ -98,9 +98,19 @@ export async function go() {
         ...store.state,
         state: 'error',
         message: `[${userName}] Sync error`,
-        details: String(error),
+        details:
+          String(error) +
+          hints(String(error)) +
+          '\n\nYour submission has NOT been saved. To avoid losing your work, please make a backup copy of your code and then reload the page.',
       }
     }
     await new Promise((resolve) => setTimeout(resolve, 3000))
   }
+}
+
+function hints(msg) {
+  if (msg.match(/PERMISSION_DENIED/)) {
+    return '\n\nThis is most likely because the editor has been locked because either the time is up or the game hasn’t been started yet.'
+  }
+  return ''
 }
