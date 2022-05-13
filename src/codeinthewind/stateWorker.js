@@ -89,6 +89,11 @@ export async function go() {
 
   for (;;) {
     try {
+      const proposedData = { ...currentData, ...pendingDataToSync }
+      if (!proposedData.html || !proposedData.css) {
+        console.log('Not saving empty data')
+        continue
+      }
       const keysToUpdate = Object.keys(pendingDataToSync)
       let changed = 0
       for (const key of keysToUpdate) {
