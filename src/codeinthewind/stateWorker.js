@@ -130,8 +130,9 @@ export async function go() {
           hints(String(error)) +
           '\n\nYour submission has NOT been saved. To avoid losing your work, please make a backup copy of your code and then reload the page.',
       }
+    } finally {
+      await new Promise((resolve) => setTimeout(resolve, 3000))
     }
-    await new Promise((resolve) => setTimeout(resolve, 3000))
   }
 }
 
